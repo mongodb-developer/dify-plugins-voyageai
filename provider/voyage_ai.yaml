@@ -1,0 +1,29 @@
+identity:
+  author: mongodb
+  name: voyage_ai
+  label:
+    en_US: Voyage AI
+  description:
+    en_US: Generate vector embeddings and rerank documents using Voyage AI models hosted on MongoDB Atlas.
+  icon: logo.webp
+  tags:
+    - utilities
+credentials_for_provider:
+  voyage_api_key:
+    type: secret-input
+    required: true
+    label:
+      en_US: Voyage AI API Key
+    placeholder:
+      en_US: pa-...
+    help:
+      en_US: >
+        Create a model API key in Atlas: navigate to your project → AI Models → Create model API key.
+        The key starts with "pa-".
+    url: https://www.mongodb.com/docs/atlas/voyageai/management/api-keys/
+tools:
+  - tools/embed.yaml
+  - tools/rerank.yaml
+extra:
+  python:
+    source: provider/voyage_ai.py

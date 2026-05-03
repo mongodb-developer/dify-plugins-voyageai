@@ -1,0 +1,80 @@
+identity:
+  name: rerank
+  author: mongodb
+  label:
+    en_US: Rerank Documents
+description:
+  human:
+    en_US: >
+      Rerank a list of documents against a query using a Voyage AI reranking model
+      hosted on MongoDB Atlas. Returns the documents sorted by relevance score (highest first).
+  llm: Rerank a list of documents against a query using Voyage AI. Returns documents sorted by relevance score. Use this after a keyword or vector search to improve result quality.
+parameters:
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query
+    human_description:
+      en_US: The search query to rank the documents against.
+    llm_description: The user query or question to rank the documents against.
+    form: llm
+
+  - name: documents
+    type: string
+    required: true
+    label:
+      en_US: Documents (JSON array)
+    human_description:
+      en_US: The list of documents to rerank as a JSON array of strings.
+    llm_description: "JSON array of document strings to rerank. Example: [\"doc one text\", \"doc two text\"]"
+    form: llm
+
+  - name: model
+    type: select
+    required: false
+    label:
+      en_US: Reranking Model
+    human_description:
+      en_US: The Voyage AI reranking model to use. Defaults to rerank-2.5 (best quality, 200M free tokens).
+    llm_description: Voyage AI reranking model name. Defaults to rerank-2.5.
+    form: form
+    default: rerank-2.5
+    options:
+      - value: rerank-2.5
+        label:
+          en_US: "rerank-2.5 — highest accuracy, 32K ctx ($0.05/1M, 200M free)"
+      - value: rerank-2.5-lite
+        label:
+          en_US: "rerank-2.5-lite — fast & cost-effective, 32K ctx ($0.02/1M, 200M free)"
+      - value: rerank-2
+        label:
+          en_US: "rerank-2 — prev gen, multilingual, 16K ctx ($0.05/1M)"
+      - value: rerank-2-lite
+        label:
+          en_US: "rerank-2-lite — prev gen lite, multilingual, 8K ctx ($0.02/1M)"
+
+  - name: top_k
+    type: number
+    required: false
+    label:
+      en_US: Top K
+    human_description:
+      en_US: Return only the top K most relevant documents. Leave blank to return all.
+    llm_description: Return only the top K most relevant documents. Leave empty to return all documents sorted by score.
+    form: llm
+
+  - name: truncation
+    type: boolean
+    required: false
+    label:
+      en_US: Truncate Long Documents
+    human_description:
+      en_US: If true, truncate documents that exceed the model token limit instead of raising an error (default true).
+    llm_description: Whether to truncate documents exceeding the model token limit. Default true.
+    form: form
+    default: true
+
+extra:
+  python:
+    source: tools/rerank.py

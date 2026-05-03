@@ -1,0 +1,136 @@
+identity:
+  name: embed
+  author: mongodb
+  label:
+    en_US: Embed Text
+description:
+  human:
+    en_US: >
+      Generate a vector embedding for a single text using a Voyage AI embedding model
+      hosted on MongoDB Atlas. Returns the embedding as a JSON array string that can
+      be piped directly into the MongoDB Atlas Vector Search tool's Query Vector field.
+  llm: Generate a vector embedding for a single text using Voyage AI. Returns the embedding as a JSON-serialised float array. Use input_type "query" for search queries and "document" for content to be indexed.
+parameters:
+  - name: text
+    type: string
+    required: true
+    label:
+      en_US: Text
+    human_description:
+      en_US: The text to embed. Pipe a workflow variable directly here (e.g. the user query).
+    llm_description: The text to convert into a vector embedding.
+    form: llm
+
+  - name: model
+    type: select
+    required: false
+    label:
+      en_US: Embedding Model
+    human_description:
+      en_US: The Voyage AI embedding model to use. Defaults to voyage-4 (balanced quality and cost).
+    llm_description: Voyage AI embedding model name. Defaults to voyage-4.
+    form: form
+    default: voyage-4
+    options:
+      - value: voyage-4-large
+        label:
+          en_US: "voyage-4-large — best quality, 1024-dim default (32K ctx, $0.12/1M)"
+      - value: voyage-4
+        label:
+          en_US: "voyage-4 — balanced quality/cost, 1024-dim default (32K ctx, $0.06/1M)"
+      - value: voyage-4-lite
+        label:
+          en_US: "voyage-4-lite — lowest latency/cost, 1024-dim default (32K ctx, $0.02/1M)"
+      - value: voyage-4-nano
+        label:
+          en_US: "voyage-4-nano — open-weight, 512-dim default (32K ctx)"
+      - value: voyage-context-3
+        label:
+          en_US: "voyage-context-3 — contextualized chunks, 1024-dim (32K ctx, $0.18/1M)"
+      - value: voyage-code-3
+        label:
+          en_US: "voyage-code-3 — code & docs, 1024-dim (32K ctx, $0.18/1M)"
+      - value: voyage-finance-2
+        label:
+          en_US: "voyage-finance-2 — finance RAG, 1024-dim fixed (32K ctx, $0.12/1M)"
+      - value: voyage-law-2
+        label:
+          en_US: "voyage-law-2 — legal RAG, 1024-dim fixed (16K ctx, $0.12/1M)"
+      - value: voyage-3-large
+        label:
+          en_US: "voyage-3-large — prev gen general, 1024-dim default (32K ctx)"
+      - value: voyage-3.5
+        label:
+          en_US: "voyage-3.5 — prev gen general, 1024-dim default (32K ctx)"
+      - value: voyage-3.5-lite
+        label:
+          en_US: "voyage-3.5-lite — prev gen lite, 1024-dim default (32K ctx)"
+      - value: voyage-code-2
+        label:
+          en_US: "voyage-code-2 — prev gen code, 1536-dim fixed (16K ctx)"
+
+  - name: output_dimensions
+    type: select
+    required: false
+    label:
+      en_US: Output Dimensions
+    human_description:
+      en_US: >
+        Number of dimensions in the output embedding. Only supported by voyage-4-*, voyage-3-large,
+        voyage-3.5*, voyage-context-3, voyage-code-3. Fixed at 1024 for voyage-finance-2/law-2,
+        1536 for voyage-code-2, 512 for voyage-4-nano. Leave blank to use the model default.
+    llm_description: Output embedding dimensions. Supported values depend on model. Leave empty for model default.
+    form: form
+    default: ""
+    options:
+      - value: ""
+        label:
+          en_US: Default (model default)
+      - value: "256"
+        label:
+          en_US: "256"
+      - value: "512"
+        label:
+          en_US: "512"
+      - value: "1024"
+        label:
+          en_US: "1024"
+      - value: "2048"
+        label:
+          en_US: "2048"
+
+  - name: input_type
+    type: select
+    required: false
+    label:
+      en_US: Input Type
+    human_description:
+      en_US: Use "query" when embedding a search query, "document" when embedding content to store. Leave blank for generic.
+    llm_description: Set to "query" when embedding a search query, "document" when embedding content to store. Leave empty for generic use.
+    form: form
+    default: query
+    options:
+      - value: query
+        label:
+          en_US: query (for search queries)
+      - value: document
+        label:
+          en_US: document (for content to index)
+      - value: ""
+        label:
+          en_US: None (generic)
+
+  - name: truncation
+    type: boolean
+    required: false
+    label:
+      en_US: Truncate Long Text
+    human_description:
+      en_US: If true, truncate text that exceeds the model token limit instead of raising an error (default true).
+    llm_description: Whether to truncate text exceeding the model token limit. Default true.
+    form: form
+    default: true
+
+extra:
+  python:
+    source: tools/embed.py
