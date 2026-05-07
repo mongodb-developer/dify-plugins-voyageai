@@ -41,9 +41,6 @@ parameters:
       - value: voyage-4-lite
         label:
           en_US: "voyage-4-lite — lowest latency/cost, 1024-dim default (32K ctx, $0.02/1M)"
-      - value: voyage-4-nano
-        label:
-          en_US: "voyage-4-nano — open-weight, 512-dim default (32K ctx)"
       - value: voyage-context-3
         label:
           en_US: "voyage-context-3 — contextualized chunks, 1024-dim (32K ctx, $0.18/1M)"
@@ -78,7 +75,7 @@ parameters:
       en_US: >
         Number of dimensions in the output embedding. Only supported by voyage-4-*, voyage-3-large,
         voyage-3.5*, voyage-context-3, voyage-code-3. Fixed at 1024 for voyage-finance-2/law-2,
-        1536 for voyage-code-2, 512 for voyage-4-nano. Leave blank to use the model default.
+        1536 for voyage-code-2. Leave blank to use the model default.
     llm_description: Output embedding dimensions. Supported values depend on model. Leave empty for model default.
     form: form
     default: ""

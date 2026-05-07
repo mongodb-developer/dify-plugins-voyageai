@@ -2,7 +2,7 @@
 
 A **Tool-type** Dify plugin that lets Chatflow, Workflow, and Agent applications generate **vector embeddings** and **rerank documents** using [Voyage AI](https://www.mongodb.com/docs/atlas/voyageai/) models hosted on MongoDB Atlas.
 
-> **Companion plugin:** Use the **[MongoDB Atlas Tool](https://github.com/Pash10g/dify-plugins/tree/main/mongodb/mongodb_atlas_tool)** plugin to perform vector search with the embeddings generated here. The Embed Text output can be piped directly into the Vector Search tool's **Query Vector** field.
+> **Companion plugin:** Use the **[MongoDB Atlas Tool](https://marketplace.dify.ai/plugin/mongodb/mongodb_atlas_tool)** plugin to perform vector search with the embeddings generated here. The Embed Text output can be piped directly into the Vector Search tool's **Query Vector** field.
 
 ---
 
@@ -25,12 +25,13 @@ Embed Text (input_type=query)
      │  output: text → JSON float array
      ▼
 MongoDB Atlas Vector Search (query_vector = {{embed.text}})
-     │  output: documents
+     │  json output: json[0], json[1], ... (individual documents)
+     │  text output: stringified doc array (for reranker)
      ▼
-Rerank Documents (query, documents)
-     │  output: results sorted by relevance_score
+Rerank Documents (query, documents = {{vector_search.text}})
+     │  json output: json[0], json[1], ... (ranked results)
      ▼
-[LLM / answer node]
+Iterate node / [LLM answer node]
 ```
 
 ---
@@ -111,24 +112,20 @@ Rerank a list of documents against a query. Returns documents sorted by relevanc
 | Parameter | Type | Required | Form | Description |
 |---|---|---|---|---|
 | `query` | string | ✅ | llm | The search query |
-| `documents` | string | ✅ | llm | JSON array of document strings, e.g. `["doc one", "doc two"]` |
+| `documents` | string | ✅ | llm | JSON array of document strings, e.g. `["doc one", "doc two"]`. Also accepts a native list piped from another tool (e.g. Vector Search `text` output). |
 | `model` | select | ❌ | form | Reranking model (default `rerank-2.5`) |
 | `top_k` | number | ❌ | llm | Return only top K results (blank = return all) |
 | `truncation` | boolean | ❌ | form | Truncate long documents (default true) |
 
-**Output:**
+**Output (JSON):** Each ranked result is yielded as its own JSON message — `json[0]` is the highest-scored, `json[1]` is the second, etc. Directly iterable in Dify's Iterate/Loop nodes.
+
 ```json
-{
-  "model": "rerank-2.5",
-  "query": "company goals",
-  "count": 3,
-  "total_tokens": 120,
-  "results": [
-    {"index": 0, "relevance_score": 0.847, "document": "This quarter..."},
-    {"index": 2, "relevance_score": 0.269, "document": "Photosynthesis..."},
-    {"index": 1, "relevance_score": 0.249, "document": "20th-century..."}
-  ]
-}
+// json[0]
+{"index": 0, "relevance_score": 0.847, "document": "This quarter..."}
+// json[1]
+{"index": 2, "relevance_score": 0.269, "document": "Photosynthesis..."}
+// json[2]
+{"index": 1, "relevance_score": 0.249, "document": "20th-century..."}
 ```
 
 ---
@@ -142,7 +139,6 @@ Rerank a list of documents against a query. Returns documents sorted by relevanc
 | `voyage-4-large` | 1024 (default), 256, 512, 2048 | 32K | Best quality, multilingual |
 | `voyage-4` | 1024 (default), 256, 512, 2048 | 32K | Balanced quality/cost (**recommended**) |
 | `voyage-4-lite` | 1024 (default), 256, 512, 2048 | 32K | Lowest latency and cost |
-| `voyage-4-nano` | 512 (default), 128, 256 | 32K | Open-weight model |
 | `voyage-context-3` | 1024 (default), 256, 512, 2048 | 32K | Contextualized chunk embeddings |
 | `voyage-code-3` | 1024 (default), 256, 512, 2048 | 32K | Code and technical documentation |
 | `voyage-finance-2` | 1024 (fixed) | 32K | Finance RAG |
@@ -165,7 +161,7 @@ Rerank a list of documents against a query. Returns documents sorted by relevanc
 
 ## Support
 
-- **GitHub Issues:** https://github.com/mongodb-developer/dify-plugins-mongodbatlas-tool/issues
+- **GitHub Issues:** https://github.com/mongodb-developer/dify-plugins-voyageai/issues
 - **MongoDB Developer Community:** https://www.mongodb.com/community/forums/
 
 ---

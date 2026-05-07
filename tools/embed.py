@@ -74,7 +74,10 @@ class EmbedTool(Tool):
         # the MongoDB Atlas Vector Search tool's `query_vector` parameter.
         embedding_json = json.dumps(embedding)
 
-        yield self.create_text_message(embedding_json)
+        # Yield the JSON message first so the structured output (with the native
+        # `embedding` list) is available for variable piping in Dify workflows.
+        # The `embedding` field is a flat list[float] that can be wired directly
+        # into Vector Search's `query_vector` parameter.
         yield self.create_json_message({
             "model": model,
             "input_type": input_type,
@@ -83,3 +86,4 @@ class EmbedTool(Tool):
             "embedding": embedding,
             "embedding_json": embedding_json,
         })
+        yield self.create_text_message(embedding_json)

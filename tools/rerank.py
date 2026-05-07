@@ -21,15 +21,29 @@ class RerankTool(Tool):
         if not query:
             raise ValueError("query is required.")
 
-        documents_raw = (tool_parameters.get("documents") or "").strip()
-        if not documents_raw:
+        documents_param = tool_parameters.get("documents")
+        if not documents_param:
             raise ValueError("documents is required.")
-        try:
-            documents = json.loads(documents_raw)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid documents JSON: {e}")
+
+        # Accept: native list (piped from another tool), or JSON string
+        if isinstance(documents_param, list):
+            documents = documents_param
+        elif isinstance(documents_param, str) and documents_param.strip():
+            try:
+                documents = json.loads(documents_param.strip())
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid documents JSON: {e}")
+        else:
+            raise ValueError("documents must be a non-empty JSON array of strings.")
+
         if not isinstance(documents, list) or not documents:
             raise ValueError("documents must be a non-empty JSON array of strings.")
+
+        # Ensure each element is a string (convert dicts to JSON strings if needed)
+        documents = [
+            json.dumps(d, ensure_ascii=False) if isinstance(d, dict) else str(d)
+            for d in documents
+        ]
 
         model = (tool_parameters.get("model") or "rerank-2.5").strip()
         top_k_raw = tool_parameters.get("top_k")
@@ -65,10 +79,5 @@ class RerankTool(Tool):
             getattr(result, "total_tokens", "n/a"),
         )
 
-        yield self.create_json_message({
-            "model": model,
-            "query": query,
-            "count": len(ranked),
-            "total_tokens": getattr(result, "total_tokens", None),
-            "results": ranked,
-        })
+        for r in ranked:
+            yield self.create_json_message(r)

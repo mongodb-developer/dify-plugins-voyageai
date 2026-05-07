@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.3
 type: plugin
 author: mongodb
 name: voyage_ai
@@ -15,7 +15,7 @@ plugins:
   tools:
     - provider/voyage_ai.yaml
 meta:
-  version: 0.0.1
+  version: 0.0.3
   arch:
     - amd64
     - arm64
